@@ -1,4 +1,4 @@
-export type TrustLevel = 'watched' | 'sign' | 'agent';
+export type TrustLevel = 'watched' | 'logged' | 'sign' | 'agent';
 
 export interface Wallet {
   id: string;
@@ -149,8 +149,8 @@ export const wallets: Wallet[] = [
     trust: 'watched',
     chain: 'Ethereum',
     assets: [
-      { symbol: 'USDT', amount: 3500, valueRp: 56_560_000 },
-      { symbol: 'mETH', amount: 0.8, valueRp: 46_200_000 },
+      { symbol: 'USDT', amount: 3500, valueRp: 56_000_000 },
+      { symbol: 'mETH', amount: 0.8, valueRp: 38_400_000 },
     ],
   },
   {
@@ -160,7 +160,7 @@ export const wallets: Wallet[] = [
     trust: 'watched',
     chain: 'CEX',
     assets: [
-      { symbol: 'USDT', amount: 847, valueRp: 13_689_500 },
+      { symbol: 'USDT', amount: 847, valueRp: 13_552_000 },
     ],
   },
   {
@@ -170,7 +170,7 @@ export const wallets: Wallet[] = [
     trust: 'watched',
     chain: 'Solana',
     assets: [
-      { symbol: 'SOL', amount: 0.42, valueRp: 2_940_000 },
+      { symbol: 'SOL', amount: 0.42, valueRp: 1_008_000 },
     ],
   },
   {
@@ -180,8 +180,8 @@ export const wallets: Wallet[] = [
     trust: 'sign',
     chain: 'Ethereum',
     assets: [
-      { symbol: 'USDT', amount: 1240, valueRp: 20_048_000 },
-      { symbol: 'USDY', amount: 450, valueRp: 7_276_500 },
+      { symbol: 'USDT', amount: 1240, valueRp: 19_840_000 },
+      { symbol: 'USDY', amount: 450, valueRp: 7_200_000 },
     ],
   },
   {
@@ -191,7 +191,7 @@ export const wallets: Wallet[] = [
     trust: 'agent',
     chain: 'Ethereum',
     assets: [
-      { symbol: 'USDT', amount: 680, valueRp: 10_992_000 },
+      { symbol: 'USDY', amount: 680, valueRp: 10_880_000 },
     ],
   },
 ];
@@ -202,20 +202,19 @@ export const offchainAccounts: OffchainAccount[] = [
   { id: 'cash', name: 'Cash', type: 'cash', valueRp: 500_000 },
 ];
 
-export const totalNetWorth = 1_284_730_000;
-export const totalOnchain = 1_210_000_000;
-export const totalOffchain = 79_700_000;
-export const monthlyChangeRp = 41_200_000;
+export const totalOnchain = 146_880_000;
+export const totalOffchain = 36_192_000;
+export const totalNetWorth = 183_072_000;
+export const monthlyChangeRp = 5_850_000;
 export const monthlyChangePct = 3.3;
 
 // ── Chart data (30 days of net worth) ──────────────────────────────────────
 export const chartData30d = (() => {
-  const base = 1_243_530_000;
+  const base = 177_222_000;
   const points: number[] = [];
-  let val = base;
   for (let i = 0; i < 30; i++) {
-    const drift = (Math.sin(i * 0.4) * 8_000_000) + (Math.cos(i * 0.7) * 4_000_000) + (i * 1_300_000);
-    val = base + drift;
+    const drift = (Math.sin(i * 0.4) * 2_500_000) + (Math.cos(i * 0.7) * 1_200_000) + (i * 195_000);
+    const val = base + drift;
     points.push(val);
   }
   points[29] = totalNetWorth;
@@ -245,7 +244,7 @@ export const todayActivities: Activity[] = [
     amount: '−Rp 200.000',
     valueRp: -200_000,
     wallet: 'GoPay',
-    trust: 'watched',
+    trust: 'logged',
     positive: false,
   },
 ];
@@ -270,7 +269,7 @@ export const linkedTrade: LinkedTrade = {
       amount: '+Rp 35.380.000',
       wallet: 'BCA',
       walletSublabel: 'you logged',
-      trust: 'watched',
+      trust: 'logged',
       isOffchain: true,
     },
   ],
@@ -440,14 +439,14 @@ export const agentLogEntries: AgentLogEntry[] = [
     id: 'le4',
     description: 'Auto-saved 50 USDT weekly',
     timeAgo: '3 days ago',
-    hash: '0x6b1e…a027',
+    hash: '0x6b1e…d4f5',
     confirmed: true,
   },
   {
     id: 'le5',
     description: 'Reinvested USDY yield',
     timeAgo: '5 days ago',
-    hash: '0x4d1c…7e08',
+    hash: '0x4d1c…e8a2',
     confirmed: true,
   },
 ];

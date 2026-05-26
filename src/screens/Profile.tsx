@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {
-  Eye, PenLine, Bot, LogOut, Plus, Upload, Trash2, ChevronRight,
+  LogOut, Plus, Upload, Trash2,
   Sun, Moon, Globe, Banknote, Clock,
 } from 'lucide-react';
 import { TrustBadge } from '../components/TrustBadge';
@@ -108,10 +108,7 @@ export function ProfileScreen({ darkMode, onToggleDark }: { darkMode: boolean; o
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-sm text-ink-800 dark:text-ink-100">{w.name}</span>
-                <span className="inline-flex items-center gap-1 text-[10px] font-medium text-watched bg-watched/10 px-1.5 py-0.5 rounded-full">
-                  <Eye size={8} strokeWidth={2.5} />
-                  Watched
-                </span>
+                <TrustBadge trust="watched" />
               </div>
               <span className="font-mono text-[11px] text-ink-400 dark:text-ink-500">
                 {w.address ?? w.sublabel}
@@ -139,10 +136,7 @@ export function ProfileScreen({ darkMode, onToggleDark }: { darkMode: boolean; o
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-sm text-ink-800 dark:text-ink-100">{a.name}</span>
-                <span className="inline-flex items-center gap-1 text-[10px] font-medium text-ink-500 dark:text-ink-400 bg-ink-100 dark:bg-ink-700 px-1.5 py-0.5 rounded-full">
-                  <PenLine size={8} strokeWidth={2.5} />
-                  Logged
-                </span>
+                <TrustBadge trust="logged" />
               </div>
               <span className="text-[11px] text-ink-400 dark:text-ink-500 font-tabular">{a.balanceLabel}</span>
             </div>

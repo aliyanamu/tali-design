@@ -1,4 +1,4 @@
-import { Eye, PenLine, Bot } from 'lucide-react';
+import { Eye, PenLine, Bot, Pencil } from 'lucide-react';
 import type { TrustLevel } from '../data';
 
 interface TrustBadgeProps {
@@ -6,13 +6,20 @@ interface TrustBadgeProps {
   size?: 'sm' | 'md';
 }
 
-const config = {
+const config: Record<TrustLevel, { label: string; icon: typeof Eye; color: string; bg: string; dot: string }> = {
   watched: {
     label: 'Watched',
     icon: Eye,
     color: 'text-watched',
     bg: 'bg-watched/10',
     dot: 'bg-watched',
+  },
+  logged: {
+    label: 'Logged',
+    icon: Pencil,
+    color: 'text-logged',
+    bg: 'bg-logged/10',
+    dot: 'bg-logged',
   },
   sign: {
     label: 'You sign',
@@ -53,8 +60,9 @@ export function TrustDot({ trust }: { trust: TrustLevel }) {
 }
 
 export function TrustLeftEdge({ trust }: { trust: TrustLevel }) {
-  const colors = {
+  const colors: Record<TrustLevel, string> = {
     watched: 'bg-watched',
+    logged: 'bg-logged',
     sign: 'bg-sign',
     agent: 'bg-agent',
   };

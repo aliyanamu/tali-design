@@ -40,7 +40,7 @@ export function RulesScreen() {
   const [composeText, setComposeText] = useState(COMPOSE_PLACEHOLDER);
 
   return (
-    <div className="animate-fade-in space-y-8">
+    <div className="animate-fade-in space-y-5">
       {/* Warm heading */}
       <div>
         <h1 className="text-2xl font-semibold text-ink-900 dark:text-cream tracking-tight">
@@ -68,8 +68,8 @@ export function RulesScreen() {
       </section>
 
       {/* How Tali understood it */}
-      <section className="bg-surface dark:bg-ink-800 rounded-3xl shadow-card dark:shadow-card-dark p-5">
-        <div className="flex items-center gap-2 mb-3">
+      <section className="bg-surface dark:bg-ink-800 rounded-3xl shadow-card dark:shadow-card-dark p-4">
+        <div className="flex items-center gap-2 mb-2.5">
           <span className="text-xs font-semibold text-ink-600 dark:text-ink-300 uppercase tracking-wide">
             How Tali understood it
           </span>
@@ -90,19 +90,19 @@ export function RulesScreen() {
             </span>
           ))}
         </div>
-        <button className="mt-4 inline-flex items-center gap-2 bg-sign text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-sign/90 transition-colors">
+        <button className="mt-3 inline-flex items-center gap-2 bg-sign text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-sign/90 transition-colors">
           Activate rule
         </button>
       </section>
 
-      {/* Active rule — feels alive */}
+      {/* Active rule */}
       <section>
-        <p className="text-xs font-semibold text-ink-400 dark:text-ink-500 uppercase tracking-wide mb-3 px-1">
+        <p className="text-xs font-semibold text-ink-400 dark:text-ink-500 uppercase tracking-wide mb-2 px-1">
           Active
         </p>
         <div className="bg-surface dark:bg-ink-800 rounded-3xl shadow-card dark:shadow-card-dark overflow-hidden relative">
           <TrustLeftEdge trust="agent" />
-          <div className="pl-5 pr-4 py-4">
+          <div className="pl-5 pr-4 py-3.5">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-sm font-semibold text-ink-800 dark:text-ink-100">
                 {activeRule.title}
@@ -113,21 +113,19 @@ export function RulesScreen() {
               </span>
             </div>
 
-            <div className="flex items-center gap-3 mt-2.5">
-              <span className="text-xs text-ink-400 dark:text-ink-500">
-                last acted {activeRule.lastActed}
-              </span>
-            </div>
+            <span className="text-xs text-ink-400 dark:text-ink-500 mt-1 inline-block">
+              last acted {activeRule.lastActed}
+            </span>
 
             {/* Most recent action inline */}
-            <div className="mt-3 bg-ink-50/60 dark:bg-ink-700/20 rounded-2xl px-4 py-3">
+            <div className="mt-2 bg-ink-50/60 dark:bg-ink-700/20 rounded-2xl px-3.5 py-2.5">
               <div className="flex items-center gap-2 flex-wrap">
                 <TrustBadge trust="agent" />
                 <span className="text-sm font-medium text-ink-700 dark:text-ink-200">
                   {activeRule.latestAction}
                 </span>
               </div>
-              <p className="text-xs text-ink-500 dark:text-ink-400 mt-1 leading-relaxed">
+              <p className="text-xs text-ink-500 dark:text-ink-400 mt-0.5 leading-relaxed">
                 {activeRule.reasoning}
                 <span className="text-[10px] text-ink-300 dark:text-ink-600 ml-1.5">
                   {activeRule.attestation}

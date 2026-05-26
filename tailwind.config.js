@@ -14,7 +14,8 @@ export default {
         charcoal: '#1A1714',
         cream: '#F0EBE0',
         // Trust spine
-        watched: '#8A94A6',
+        watched: '#7C8AA6',
+        logged: '#9B9389',
         sign: '#2E9E6B',
         agent: '#8B7DE8',
         amber: '#E0A33E',

@@ -1,4 +1,4 @@
-import { TrendingUp, Wallet, Landmark, Coins, Banknote, Building2 } from 'lucide-react';
+import { TrendingUp, Landmark, Coins, Banknote, Building2, Diamond, Ghost, ShieldCheck, FileCode } from 'lucide-react';
 import { TrustBadge } from '../components/TrustBadge';
 import { AreaChart } from '../components/AreaChart';
 import {
@@ -22,15 +22,25 @@ function formatRpShort(n: number): string {
   return `Rp ${n.toLocaleString('id-ID')}`;
 }
 
-const chainIcons: Record<string, typeof Wallet> = {
-  Ethereum: Coins,
-  CEX: Building2,
-  Solana: Wallet,
+const walletIcons: Record<string, typeof Diamond> = {
+  metamask: Diamond,
+  indodax: Building2,
+  phantom: Ghost,
+  tali: ShieldCheck,
+  autonomous: FileCode,
+};
+
+const walletIconColors: Record<string, string> = {
+  metamask: 'bg-amber/10 text-amber',
+  indodax: 'bg-sign/10 text-sign',
+  phantom: 'bg-violet-500/10 text-violet-500',
+  tali: 'bg-sign/10 text-sign',
+  autonomous: 'bg-agent/10 text-agent',
 };
 
 const offchainIcons: Record<string, typeof Landmark> = {
   bank: Building2,
-  ewallet: Wallet,
+  ewallet: Landmark,
   cash: Banknote,
 };
 
@@ -40,7 +50,7 @@ export function Overview() {
 
   return (
     <div className="animate-fade-in space-y-8">
-      {/* ── Hero ─────────────────────────────────────────────────────────── */}
+      {/* Hero */}
       <section className="space-y-1.5">
         <p className="text-sm font-medium text-ink-500 dark:text-ink-400">
           Your money, all in one place
@@ -59,12 +69,12 @@ export function Overview() {
         </div>
       </section>
 
-      {/* ── 30-day chart ────────────────────────────────────────────────── */}
+      {/* 30-day chart */}
       <section>
         <AreaChart data={chartData30d} height={140} />
       </section>
 
-      {/* ── Where it lives ──────────────────────────────────────────────── */}
+      {/* Where it lives */}
       <section>
         <h2 className="text-sm font-semibold text-ink-700 dark:text-cream mb-3">Where it lives</h2>
         <div className="bg-surface dark:bg-ink-800 rounded-3xl shadow-card dark:shadow-card-dark overflow-hidden">
@@ -88,14 +98,15 @@ export function Overview() {
           <div className="divide-y divide-ink-50 dark:divide-ink-700/60">
             {onchainWallets.map((wallet) => {
               const total = wallet.assets.reduce((s, a) => s + a.valueRp, 0);
-              const ChainIcon = chainIcons[wallet.chain] || Wallet;
+              const WIcon = walletIcons[wallet.id] || Coins;
+              const wColor = walletIconColors[wallet.id] || 'bg-ink-50 dark:bg-ink-700 text-ink-500 dark:text-ink-300';
               return (
                 <div
                   key={wallet.id}
                   className="flex items-center gap-3 px-5 py-3.5 hover:bg-ink-50/40 dark:hover:bg-ink-700/20 transition-colors cursor-pointer"
                 >
-                  <div className="w-9 h-9 rounded-xl bg-ink-50 dark:bg-ink-700 flex items-center justify-center shrink-0">
-                    <ChainIcon size={15} className="text-ink-500 dark:text-ink-300" strokeWidth={2} />
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${wColor}`}>
+                    <WIcon size={15} strokeWidth={2} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -158,9 +169,12 @@ export function Overview() {
                     <AccIcon size={15} className="text-ink-500 dark:text-ink-300" strokeWidth={2} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <span className="text-sm font-medium text-ink-800 dark:text-ink-100">
-                      {acc.name}
-                    </span>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm font-medium text-ink-800 dark:text-ink-100">
+                        {acc.name}
+                      </span>
+                      <TrustBadge trust="logged" />
+                    </div>
                   </div>
                   <div className="text-right shrink-0">
                     <p className="text-sm font-semibold font-tabular text-ink-800 dark:text-cream">
@@ -176,7 +190,7 @@ export function Overview() {
         </div>
       </section>
 
-      {/* ── Amber nudge ─────────────────────────────────────────────────── */}
+      {/* Amber nudge */}
       <section className="bg-amber/[0.06] dark:bg-amber/[0.08] rounded-3xl p-5 border border-amber/15">
         <div className="flex items-start gap-2.5 mb-4">
           <div className="w-6 h-6 rounded-lg bg-amber/15 flex items-center justify-center shrink-0 mt-0.5">

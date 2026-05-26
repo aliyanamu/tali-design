@@ -260,18 +260,20 @@ export function ProfileScreen({ darkMode, onToggleDark }: { darkMode: boolean; o
       </Section>
 
       {/* Save */}
-      {isDirty && (
-        <div className="flex justify-end">
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="inline-flex items-center gap-2 bg-sign text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-sign/90 transition-colors disabled:opacity-60"
-          >
-            <Save size={14} strokeWidth={2} />
-            {saving ? 'Saving…' : 'Save changes'}
-          </button>
-        </div>
-      )}
+      <div className="flex justify-end">
+        <button
+          onClick={handleSave}
+          disabled={!isDirty || saving}
+          className={`inline-flex items-center gap-2 text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors ${
+            isDirty
+              ? 'bg-sign text-white hover:bg-sign/90'
+              : 'bg-ink-100 dark:bg-ink-700 text-ink-400 dark:text-ink-500 cursor-default'
+          }`}
+        >
+          <Save size={14} strokeWidth={2} />
+          {saving ? 'Saving…' : 'Save changes'}
+        </button>
+      </div>
     </div>
   );
 }

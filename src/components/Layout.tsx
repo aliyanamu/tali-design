@@ -1,7 +1,8 @@
-import { Moon, Sun, LayoutDashboard, Activity, GitBranch, Bot } from 'lucide-react';
+import { LayoutDashboard, Activity, GitBranch, Bot, User } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { userProfile } from '../data';
 
-type Screen = 'overview' | 'activity' | 'rules' | 'agent';
+type Screen = 'overview' | 'activity' | 'rules' | 'agent' | 'profile';
 
 interface LayoutProps {
   children: ReactNode;
@@ -57,14 +58,22 @@ export function Layout({ children, activeScreen, onNavigate, darkMode, onToggleD
             })}
           </nav>
 
-          {/* Theme toggle */}
-          <div className="px-6 pb-7 pt-4">
+          {/* Profile row at bottom */}
+          <div className="px-3 pb-5">
             <button
-              onClick={onToggleDark}
-              className="flex items-center gap-2.5 text-sm text-ink-400 dark:text-ink-500 hover:text-ink-700 dark:hover:text-cream transition-colors"
+              onClick={() => onNavigate('profile')}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                activeScreen === 'profile'
+                  ? 'bg-sign/10 text-sign'
+                  : 'text-ink-500 dark:text-ink-400 hover:bg-ink-50 dark:hover:bg-ink-800 hover:text-ink-800 dark:hover:text-cream'
+              }`}
             >
-              {darkMode ? <Sun size={15} /> : <Moon size={15} />}
-              <span>{darkMode ? 'Light mode' : 'Dark mode'}</span>
+              <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-sign/25 to-amber/15 flex items-center justify-center shrink-0">
+                <span className="text-[10px] font-semibold text-ink-800 dark:text-cream">
+                  {userProfile.avatarInitial}
+                </span>
+              </div>
+              {userProfile.name}
             </button>
           </div>
         </aside>
@@ -95,11 +104,19 @@ export function Layout({ children, activeScreen, onNavigate, darkMode, onToggleD
               );
             })}
             <button
-              onClick={onToggleDark}
-              className="flex-1 flex flex-col items-center gap-1 py-3 text-[10px] font-medium text-ink-400 dark:text-ink-500 transition-colors"
+              onClick={() => onNavigate('profile')}
+              className={`flex-1 flex flex-col items-center gap-1 py-3 text-[10px] font-medium transition-colors ${
+                activeScreen === 'profile' ? 'text-sign' : 'text-ink-400 dark:text-ink-500'
+              }`}
             >
-              {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-              {darkMode ? 'Light' : 'Dark'}
+              <div className={`w-[18px] h-[18px] rounded-md flex items-center justify-center ${
+                activeScreen === 'profile' ? 'bg-sign/15' : 'bg-ink-100 dark:bg-ink-700'
+              }`}>
+                <span className={`text-[8px] font-bold leading-none ${activeScreen === 'profile' ? 'text-sign' : 'text-ink-400 dark:text-ink-500'}`}>
+                  {userProfile.avatarInitial}
+                </span>
+              </div>
+              Profile
             </button>
           </div>
         </nav>

@@ -112,6 +112,34 @@ export interface AgentLogEntry {
   confirmed: boolean;
 }
 
+export interface UserProfile {
+  name: string;
+  email: string;
+  avatarInitial: string;
+}
+
+export interface WatchedWallet {
+  id: string;
+  name: string;
+  address?: string;
+  sublabel?: string;
+}
+
+export interface LoggedAccount {
+  id: string;
+  name: string;
+  type: 'bank' | 'ewallet' | 'cash';
+  balanceLabel: string;
+}
+
+export interface OwnedWallet {
+  id: string;
+  name: string;
+  address: string;
+  trust: 'sign' | 'agent';
+  nftId?: string;
+}
+
 // ── Wallets ────────────────────────────────────────────────────────────────
 export const wallets: Wallet[] = [
   {
@@ -422,4 +450,28 @@ export const agentLogEntries: AgentLogEntry[] = [
     hash: '0x4d1c…7e08',
     confirmed: true,
   },
+];
+
+// ── User Profile ──────────────────────────────────────────────────────────
+export const userProfile: UserProfile = {
+  name: 'Mufidah',
+  email: 'mufidah@tali.id',
+  avatarInitial: 'M',
+};
+
+export const watchedWallets: WatchedWallet[] = [
+  { id: 'w-metamask', name: 'MetaMask', address: '0xABC…9F2' },
+  { id: 'w-indodax', name: 'Indodax', sublabel: 'read-only API' },
+  { id: 'w-phantom', name: 'Phantom' },
+];
+
+export const loggedAccounts: LoggedAccount[] = [
+  { id: 'la-bca', name: 'BCA', type: 'bank', balanceLabel: 'Rp 35.380.000' },
+  { id: 'la-gopay', name: 'GoPay', type: 'ewallet', balanceLabel: 'Rp 312.000' },
+  { id: 'la-cash', name: 'Cash', type: 'cash', balanceLabel: 'Rp 500.000' },
+];
+
+export const ownedWallets: OwnedWallet[] = [
+  { id: 'ow-tali', name: 'Tali Wallet', address: '0xDEF…71C', trust: 'sign' },
+  { id: 'ow-autonomous', name: 'AutonomousRule.sol', address: '0xGHI…04A', trust: 'agent', nftId: 'ERC-8004 Identity #8.472' },
 ];

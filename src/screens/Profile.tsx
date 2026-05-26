@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {
-  LogOut, Plus, Upload, Trash2,
+  LogOut, Plus, Upload, Trash2, Shield, Save,
   Sun, Moon, Globe, Banknote, Clock,
 } from 'lucide-react';
 import { TrustBadge } from '../components/TrustBadge';
@@ -74,6 +74,20 @@ function OwnedWalletRow({ wallet }: { wallet: OwnedWallet }) {
 export function ProfileScreen({ darkMode, onToggleDark }: { darkMode: boolean; onToggleDark: () => void }) {
   const [language, setLanguage] = useState<'en' | 'id'>('en');
   const [staleDays, setStaleDays] = useState(60);
+  const [savedLanguage, setSavedLanguage] = useState<'en' | 'id'>('en');
+  const [savedStaleDays, setSavedStaleDays] = useState(60);
+  const [saving, setSaving] = useState(false);
+
+  const isDirty = language !== savedLanguage || staleDays !== savedStaleDays;
+
+  const handleSave = () => {
+    setSaving(true);
+    setTimeout(() => {
+      setSavedLanguage(language);
+      setSavedStaleDays(staleDays);
+      setSaving(false);
+    }, 600);
+  };
 
   return (
     <div className="animate-fade-in space-y-7">
@@ -164,6 +178,13 @@ export function ProfileScreen({ darkMode, onToggleDark }: { darkMode: boolean; o
         {ownedWallets.map((w) => (
           <OwnedWalletRow key={w.id} wallet={w} />
         ))}
+        <Row>
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-sign/10 text-sign">
+            <Shield size={14} strokeWidth={2.5} />
+          </div>
+          <span className="text-sm text-ink-500 dark:text-ink-400">Add MPC wallet</span>
+          <span className="text-[10px] text-ink-300 dark:text-ink-600 ml-1">secure shared-custody</span>
+        </Row>
       </Section>
 
       {/* Preferences */}
@@ -237,6 +258,20 @@ export function ProfileScreen({ darkMode, onToggleDark }: { darkMode: boolean; o
           </div>
         </Row>
       </Section>
+
+      {/* Save */}
+      {isDirty && (
+        <div className="flex justify-end">
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="inline-flex items-center gap-2 bg-sign text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-sign/90 transition-colors disabled:opacity-60"
+          >
+            <Save size={14} strokeWidth={2} />
+            {saving ? 'Saving…' : 'Save changes'}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

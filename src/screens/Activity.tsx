@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { ArrowUpRight, ArrowDownLeft, Bot, Link2, Coins, Landmark, Plus, Upload, X, Pencil, Check, Trash2 } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { ArrowUpRight, ArrowDownLeft, Bot, Link2, Coins, Landmark, Plus, Upload, X, Pencil, Check, Trash2, FileText, Image, FileUp } from 'lucide-react';
 import { TrustBadge, TrustLeftEdge } from '../components/TrustBadge';
 import {
   todayActivities,
@@ -184,21 +184,51 @@ interface ImportStatementModalProps {
 }
 
 function ImportStatementModal({ open, onClose, onImport }: ImportStatementModalProps) {
-  const [pastedText, setPastedText] = useState('');
+  const [dragActive, setDragActive] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [detected, setDetected] = useState<DetectedTx[] | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const inputRef = useRef<HTMLInputElement>(null);
 
   if (!open) return null;
 
-  const handleDetect = () => {
-    // Simulated detection
-    const sampleDetected: DetectedTx[] = [
-      { id: 'd1', date: '2024-01-15', description: 'Transfer from BCA', amount: 'Rp 2.500.000', direction: 'in' },
-      { id: 'd2', date: '2024-01-14', description: 'Groceries', amount: 'Rp 450.000', direction: 'out' },
-      { id: 'd3', date: '2024-01-12', description: 'Coffee', amount: 'Rp 85.000', direction: 'out' },
-    ];
-    setDetected(sampleDetected);
-    setSelectedIds(new Set(sampleDetected.map((t) => t.id)));
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true);
+    } else if (e.type === 'dragleave') {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      handleFile(e.target.files[0]);
+    }
+  };
+
+  const handleFile = (file: File) => {
+    setUploadedFile(file);
+    // Simulated detection after short delay
+    setTimeout(() => {
+      const sampleDetected: DetectedTx[] = [
+        { id: 'd1', date: '2024-01-15', description: 'Transfer from BCA', amount: 'Rp 2.500.000', direction: 'in' },
+        { id: 'd2', date: '2024-01-14', description: 'Groceries', amount: 'Rp 450.000', direction: 'out' },
+        { id: 'd3', date: '2024-01-12', description: 'Coffee', amount: 'Rp 85.000', direction: 'out' },
+      ];
+      setDetected(sampleDetected);
+      setSelectedIds(new Set(sampleDetected.map((t) => t.id)));
+    }, 800);
   };
 
   const toggleSelect = (id: string) => {
@@ -212,10 +242,16 @@ function ImportStatementModal({ open, onClose, onImport }: ImportStatementModalP
     if (!detected) return;
     const selected = detected.filter((t) => selectedIds.has(t.id));
     onImport(selected);
-    setPastedText('');
+    setUploadedFile(null);
     setDetected(null);
     setSelectedIds(new Set());
     onClose();
+  };
+
+  const resetUpload = () => {
+    setUploadedFile(null);
+    setDetected(null);
+    setSelectedIds(new Set());
   };
 
   return (
@@ -236,28 +272,82 @@ function ImportStatementModal({ open, onClose, onImport }: ImportStatementModalP
           {!detected ? (
             <>
               <p className="text-xs text-ink-500 dark:text-ink-400">
-                Paste your bank or e-wallet statement. We'll detect the transactions.
+                Drop a PDF or image of your bank or e-wallet statement. We'll detect the transactions.
               </p>
-              <textarea
-                value={pastedText}
-                onChange={(e) => setPastedText(e.target.value)}
-                placeholder="Paste statement here..."
-                rows={6}
-                className="w-full bg-ink-50 dark:bg-ink-700 text-ink-800 dark:text-cream rounded-xl px-4 py-3 text-sm border border-ink-100 dark:border-ink-600 focus:outline-none focus:border-sign transition-colors resize-none font-mono"
-              />
-              <button
-                onClick={handleDetect}
-                disabled={!pastedText.trim()}
-                className="w-full bg-sign text-white text-sm font-semibold py-3 rounded-xl hover:bg-sign/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+
+              <div
+                className={`relative border-2 border-dashed rounded-2xl p-8 text-center transition-colors ${
+                  dragActive
+                    ? 'border-sign bg-sign/5'
+                    : 'border-ink-200 dark:border-ink-600 bg-ink-50/30 dark:bg-ink-700/30'
+                }`}
+                onDragEnter={handleDrag}
+                onDragLeave={handleDrag}
+                onDragOver={handleDrag}
+                onDrop={handleDrop}
               >
-                Detect transactions
-              </button>
+                {!uploadedFile ? (
+                  <>
+                    <div className="w-14 h-14 rounded-2xl bg-ink-100 dark:bg-ink-700 flex items-center justify-center mx-auto mb-3">
+                      <FileUp size={24} className="text-ink-400 dark:text-ink-500" strokeWidth={1.5} />
+                    </div>
+                    <p className="text-sm font-medium text-ink-700 dark:text-ink-200 mb-1">
+                      Drop file here, or click to browse
+                    </p>
+                    <p className="text-xs text-ink-400 dark:text-ink-500 mb-3">
+                      Supports PDF, PNG, JPG
+                    </p>
+                    <div className="flex justify-center gap-2">
+                      <div className="flex items-center gap-1.5 text-xs text-ink-400 dark:text-ink-500 bg-ink-100 dark:bg-ink-700 px-2.5 py-1 rounded-lg">
+                        <FileText size={12} />
+                        PDF
+                      </div>
+                      <div className="flex items-center gap-1.5 text-xs text-ink-400 dark:text-ink-500 bg-ink-100 dark:bg-ink-700 px-2.5 py-1 rounded-lg">
+                        <Image size={12} />
+                        Image
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex items-center gap-3 justify-center">
+                    {uploadedFile.type === 'application/pdf' ? (
+                      <FileText size={20} className="text-sign" strokeWidth={1.5} />
+                    ) : (
+                      <Image size={20} className="text-sign" strokeWidth={1.5} />
+                    )}
+                    <span className="text-sm font-medium text-ink-700 dark:text-ink-200">{uploadedFile.name}</span>
+                  </div>
+                )}
+
+                <input
+                  ref={inputRef}
+                  type="file"
+                  accept=".pdf,.png,.jpg,.jpeg"
+                  onChange={handleFileInput}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+              </div>
+
+              {uploadedFile && !detected && (
+                <div className="flex items-center justify-center gap-2 text-xs text-ink-400 dark:text-ink-500">
+                  <div className="w-4 h-4 border-2 border-sign border-t-transparent rounded-full animate-spin" />
+                  Detecting transactions…
+                </div>
+              )}
             </>
           ) : (
             <>
-              <p className="text-xs text-ink-500 dark:text-ink-400">
-                Detected {detected.length} transactions. Deselect any you don't want to add.
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-ink-500 dark:text-ink-400">
+                  Detected {detected.length} transactions.
+                </p>
+                <button
+                  onClick={resetUpload}
+                  className="text-xs text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300 transition-colors"
+                >
+                  Upload different file
+                </button>
+              </div>
               <div className="space-y-2">
                 {detected.map((tx) => (
                   <div
@@ -604,7 +694,7 @@ export function ActivityScreen() {
             </div>
             <div className="text-left">
               <p className="text-sm font-medium text-ink-800 dark:text-ink-100">Import a statement</p>
-              <p className="text-xs text-ink-400 dark:text-ink-500">Paste or upload bank / e-wallet CSV</p>
+              <p className="text-xs text-ink-400 dark:text-ink-500">Upload PDF or image of bank / e-wallet</p>
             </div>
           </button>
         </div>

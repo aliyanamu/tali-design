@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { ArrowUpRight, ArrowDownLeft, Bot, Link2, Coins, Landmark, Plus, Upload, X, Pencil, Check, Trash2, FileText, Image, FileUp } from 'lucide-react';
+import { ArrowUpRight, ArrowDownLeft, Bot, Link2, Coins, Landmark, Plus, Upload, X, Pencil, Check, FileUp } from 'lucide-react';
 import { TrustBadge, TrustLeftEdge } from '../components/TrustBadge';
 import {
   todayActivities,
@@ -294,27 +294,13 @@ function ImportStatementModal({ open, onClose, onImport }: ImportStatementModalP
                     <p className="text-sm font-medium text-ink-700 dark:text-ink-200 mb-1">
                       Drop file here, or click to browse
                     </p>
-                    <p className="text-xs text-ink-400 dark:text-ink-500 mb-3">
+                    <p className="text-xs text-ink-400 dark:text-ink-500">
                       Supports PDF, PNG, JPG
                     </p>
-                    <div className="flex justify-center gap-2">
-                      <div className="flex items-center gap-1.5 text-xs text-ink-400 dark:text-ink-500 bg-ink-100 dark:bg-ink-700 px-2.5 py-1 rounded-lg">
-                        <FileText size={12} />
-                        PDF
-                      </div>
-                      <div className="flex items-center gap-1.5 text-xs text-ink-400 dark:text-ink-500 bg-ink-100 dark:bg-ink-700 px-2.5 py-1 rounded-lg">
-                        <Image size={12} />
-                        Image
-                      </div>
-                    </div>
                   </>
                 ) : (
                   <div className="flex items-center gap-3 justify-center">
-                    {uploadedFile.type === 'application/pdf' ? (
-                      <FileText size={20} className="text-sign" strokeWidth={1.5} />
-                    ) : (
-                      <Image size={20} className="text-sign" strokeWidth={1.5} />
-                    )}
+                    <FileUp size={20} className="text-sign" strokeWidth={1.5} />
                     <span className="text-sm font-medium text-ink-700 dark:text-ink-200">{uploadedFile.name}</span>
                   </div>
                 )}

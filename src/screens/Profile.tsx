@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {
-  LogOut, Plus, Upload, Trash2, Shield, Save,
+  LogOut, Plus, Trash2, Shield, Save,
   Sun, Moon, Globe, Banknote, Clock,
 } from 'lucide-react';
 import { TrustBadge } from '../components/TrustBadge';
@@ -164,12 +164,6 @@ export function ProfileScreen({ darkMode, onToggleDark }: { darkMode: boolean; o
             <Plus size={14} strokeWidth={2.5} />
           </div>
           <span className="text-sm text-ink-500 dark:text-ink-400">Add account</span>
-        </Row>
-        <Row>
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-ink-50 dark:bg-ink-700 text-ink-400 dark:text-ink-500">
-            <Upload size={14} strokeWidth={2} />
-          </div>
-          <span className="text-sm text-ink-500 dark:text-ink-400">Import statement</span>
         </Row>
       </Section>
 

@@ -1,4 +1,5 @@
-import { ArrowUpRight, ArrowDownLeft, Bot, Link2, Coins, Landmark } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowUpRight, ArrowDownLeft, Bot, Link2, Coins, Landmark, Plus, Upload, X, Pencil, Check, Trash2 } from 'lucide-react';
 import { TrustBadge, TrustLeftEdge } from '../components/TrustBadge';
 import {
   todayActivities,
@@ -6,8 +7,9 @@ import {
   linkedTrade,
   agentAction,
   reconcilePair,
+  loggedAccounts,
 } from '../data';
-import type { Activity as ActivityType, LinkedTradeSide } from '../data';
+import type { Activity as ActivityType, LinkedTradeSide, LoggedAccount } from '../data';
 
 function formatRp(n: number): string {
   const abs = Math.abs(n);
@@ -15,7 +17,289 @@ function formatRp(n: number): string {
   return `Rp ${abs.toLocaleString('id-ID')}`;
 }
 
-// ── Linked Trade Hero ──────────────────────────────────────────────────────
+// ── Bottom Sheet ─────────────────────────────────────────────────────────────
+interface BottomSheetProps {
+  open: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
+}
+
+function BottomSheet({ open, onClose, children }: BottomSheetProps) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={onClose}>
+      <div className="absolute inset-0 bg-ink-900/30 dark:bg-ink-900/50 animate-fade-in" />
+      <div
+        className="relative w-full max-w-md bg-surface dark:bg-ink-800 rounded-t-3xl shadow-2xl animate-slide-up pb-6"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-ink-100 dark:border-ink-700">
+          <span className="text-sm font-semibold text-ink-800 dark:text-ink-100">Add or import</span>
+          <button onClick={onClose} className="text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300 transition-colors p-1">
+            <X size={16} strokeWidth={2} />
+          </button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// ── Log Transaction Modal ────────────────────────────────────────────────────
+interface LogTransactionModalProps {
+  open: boolean;
+  onClose: () => void;
+  onLog: (tx: {
+    amount: string;
+    account: string;
+    direction: 'in' | 'out';
+    note?: string;
+  }) => void;
+}
+
+function LogTransactionModal({ open, onClose, onLog }: LogTransactionModalProps) {
+  const [amount, setAmount] = useState('');
+  const [account, setAccount] = useState<LoggedAccount | null>(loggedAccounts[0] ?? null);
+  const [direction, setDirection] = useState<'in' | 'out'>('in');
+  const [note, setNote] = useState('');
+
+  if (!open) return null;
+
+  const handleSubmit = () => {
+    if (!amount || !account) return;
+    onLog({ amount, account: account.name, direction, note: note || undefined });
+    setAmount('');
+    setNote('');
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={onClose}>
+      <div className="absolute inset-0 bg-ink-900/30 dark:bg-ink-900/50 animate-fade-in" />
+      <div
+        className="relative w-full max-w-md bg-surface dark:bg-ink-800 rounded-t-3xl shadow-2xl animate-slide-up pb-6"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-ink-100 dark:border-ink-700">
+          <span className="text-sm font-semibold text-ink-800 dark:text-ink-100">Log a transaction</span>
+          <button onClick={onClose} className="text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300 transition-colors p-1">
+            <X size={16} strokeWidth={2} />
+          </button>
+        </div>
+
+        <div className="px-5 pt-4 space-y-4">
+          {/* Amount */}
+          <div>
+            <label className="text-xs font-medium text-ink-600 dark:text-ink-300 mb-1 block">Amount</label>
+            <input
+              type="text"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="Rp 500.000"
+              className="w-full bg-ink-50 dark:bg-ink-700 text-ink-800 dark:text-cream rounded-xl px-4 py-3 text-sm border border-ink-100 dark:border-ink-600 focus:outline-none focus:border-sign transition-colors"
+            />
+          </div>
+
+          {/* Account */}
+          <div>
+            <label className="text-xs font-medium text-ink-600 dark:text-ink-300 mb-1 block">Account</label>
+            <div className="flex flex-wrap gap-2">
+              {loggedAccounts.map((acc) => (
+                <button
+                  key={acc.id}
+                  onClick={() => setAccount(acc)}
+                  className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-colors ${
+                    account?.id === acc.id
+                      ? 'bg-sign/10 text-sign border border-sign/30'
+                      : 'bg-ink-50 dark:bg-ink-700 text-ink-600 dark:text-ink-300 border border-transparent hover:border-ink-200 dark:hover:border-ink-500'
+                  }`}
+                >
+                  {acc.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Direction */}
+          <div>
+            <label className="text-xs font-medium text-ink-600 dark:text-ink-300 mb-1 block">Direction</label>
+            <div className="flex gap-2">
+              {(['in', 'out'] as const).map((dir) => (
+                <button
+                  key={dir}
+                  onClick={() => setDirection(dir)}
+                  className={`flex-1 text-xs font-medium px-3 py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5 ${
+                    direction === dir
+                      ? dir === 'in'
+                        ? 'bg-sign/10 text-sign border border-sign/30'
+                        : 'bg-ink-100 dark:bg-ink-700 text-ink-600 dark:text-ink-300 border border-ink-200 dark:border-ink-500'
+                      : 'bg-ink-50 dark:bg-ink-800 text-ink-400 dark:text-ink-500 border border-transparent hover:border-ink-200 dark:hover:border-ink-600'
+                  }`}
+                >
+                  {dir === 'in' ? <ArrowDownLeft size={12} /> : <ArrowUpRight size={12} />}
+                  {dir === 'in' ? 'Money in' : 'Money out'}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Note */}
+          <div>
+            <label className="text-xs font-medium text-ink-600 dark:text-ink-300 mb-1 block">Note (optional)</label>
+            <input
+              type="text"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="e.g. dinner with friends"
+              className="w-full bg-ink-50 dark:bg-ink-700 text-ink-800 dark:text-cream rounded-xl px-4 py-3 text-sm border border-ink-100 dark:border-ink-600 focus:outline-none focus:border-sign transition-colors"
+            />
+          </div>
+
+          <button
+            onClick={handleSubmit}
+            disabled={!amount || !account}
+            className="w-full bg-sign text-white text-sm font-semibold py-3 rounded-xl hover:bg-sign/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            Log transaction
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Import Statement Modal ───────────────────────────────────────────────────
+interface DetectedTx {
+  id: string;
+  date: string;
+  description: string;
+  amount: string;
+  direction: 'in' | 'out';
+}
+
+interface ImportStatementModalProps {
+  open: boolean;
+  onClose: () => void;
+  onImport: (txs: DetectedTx[]) => void;
+}
+
+function ImportStatementModal({ open, onClose, onImport }: ImportStatementModalProps) {
+  const [pastedText, setPastedText] = useState('');
+  const [detected, setDetected] = useState<DetectedTx[] | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  if (!open) return null;
+
+  const handleDetect = () => {
+    // Simulated detection
+    const sampleDetected: DetectedTx[] = [
+      { id: 'd1', date: '2024-01-15', description: 'Transfer from BCA', amount: 'Rp 2.500.000', direction: 'in' },
+      { id: 'd2', date: '2024-01-14', description: 'Groceries', amount: 'Rp 450.000', direction: 'out' },
+      { id: 'd3', date: '2024-01-12', description: 'Coffee', amount: 'Rp 85.000', direction: 'out' },
+    ];
+    setDetected(sampleDetected);
+    setSelectedIds(new Set(sampleDetected.map((t) => t.id)));
+  };
+
+  const toggleSelect = (id: string) => {
+    const next = new Set(selectedIds);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setSelectedIds(next);
+  };
+
+  const handleConfirm = () => {
+    if (!detected) return;
+    const selected = detected.filter((t) => selectedIds.has(t.id));
+    onImport(selected);
+    setPastedText('');
+    setDetected(null);
+    setSelectedIds(new Set());
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={onClose}>
+      <div className="absolute inset-0 bg-ink-900/30 dark:bg-ink-900/50 animate-fade-in" />
+      <div
+        className="relative w-full max-w-md bg-surface dark:bg-ink-800 rounded-t-3xl shadow-2xl animate-slide-up max-h-[85vh] flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-ink-100 dark:border-ink-700 shrink-0">
+          <span className="text-sm font-semibold text-ink-800 dark:text-ink-100">Import a statement</span>
+          <button onClick={onClose} className="text-ink-400 dark:text-ink-500 hover:text-ink-600 dark:hover:text-ink-300 transition-colors p-1">
+            <X size={16} strokeWidth={2} />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-5 pt-4 space-y-4">
+          {!detected ? (
+            <>
+              <p className="text-xs text-ink-500 dark:text-ink-400">
+                Paste your bank or e-wallet statement. We'll detect the transactions.
+              </p>
+              <textarea
+                value={pastedText}
+                onChange={(e) => setPastedText(e.target.value)}
+                placeholder="Paste statement here..."
+                rows={6}
+                className="w-full bg-ink-50 dark:bg-ink-700 text-ink-800 dark:text-cream rounded-xl px-4 py-3 text-sm border border-ink-100 dark:border-ink-600 focus:outline-none focus:border-sign transition-colors resize-none font-mono"
+              />
+              <button
+                onClick={handleDetect}
+                disabled={!pastedText.trim()}
+                className="w-full bg-sign text-white text-sm font-semibold py-3 rounded-xl hover:bg-sign/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Detect transactions
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="text-xs text-ink-500 dark:text-ink-400">
+                Detected {detected.length} transactions. Deselect any you don't want to add.
+              </p>
+              <div className="space-y-2">
+                {detected.map((tx) => (
+                  <div
+                    key={tx.id}
+                    onClick={() => toggleSelect(tx.id)}
+                    className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-colors ${
+                      selectedIds.has(tx.id)
+                        ? 'bg-sign/5 border border-sign/20'
+                        : 'bg-ink-50 dark:bg-ink-700 border border-transparent opacity-50'
+                    }`}
+                  >
+                    <div className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 ${
+                      selectedIds.has(tx.id) ? 'bg-sign text-white' : 'bg-ink-100 dark:bg-ink-600 text-ink-400'
+                    }`}>
+                      {selectedIds.has(tx.id) && <Check size={12} strokeWidth={3} />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-ink-800 dark:text-ink-100">{tx.description}</p>
+                      <p className="text-[10px] text-ink-400 dark:text-ink-500">{tx.date}</p>
+                    </div>
+                    <span className={`text-sm font-semibold font-tabular ${tx.direction === 'in' ? 'text-sign' : 'text-ink-600 dark:text-ink-300'}`}>
+                      {tx.direction === 'in' ? '+' : '−'}{tx.amount}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <button
+                onClick={handleConfirm}
+                disabled={selectedIds.size === 0}
+                className="w-full bg-sign text-white text-sm font-semibold py-3 rounded-xl hover:bg-sign/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Looks right — add {selectedIds.size} transaction{selectedIds.size !== 1 ? 's' : ''}
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Linked Trade Hero ──────────────────────────────────────────────────────────
 function LinkedTradeHero() {
   const [outSide, inSide] = linkedTrade.sides;
 
@@ -97,7 +381,7 @@ function TradeSide({ side }: { side: LinkedTradeSide }) {
   );
 }
 
-// ── Agent Action Row ───────────────────────────────────────────────────────
+// ── Agent Action Row ───────────────────────────────────────────────────────────
 function AgentActionRow() {
   return (
     <div className="bg-surface dark:bg-ink-800 rounded-3xl shadow-card dark:shadow-card-dark overflow-hidden relative">
@@ -125,8 +409,8 @@ function AgentActionRow() {
   );
 }
 
-// ── Simple Activity Row ─────────────────────────────────────────────────────
-function ActivityRow({ item }: { item: ActivityType }) {
+// ── Simple Activity Row ─────────────────────────────────────────────────────────
+function ActivityRow({ item, showBadge }: { item: ActivityType; showBadge?: boolean }) {
   const isPositive = item.positive;
   const Icon = isPositive ? ArrowDownLeft : ArrowUpRight;
 
@@ -147,6 +431,7 @@ function ActivityRow({ item }: { item: ActivityType }) {
               {item.tag}
             </span>
           )}
+          {showBadge && <TrustBadge trust="logged" />}
         </div>
         <div className="flex items-center gap-2 mt-0.5">
           <span className="text-xs text-ink-400 dark:text-ink-500">{item.wallet}</span>
@@ -169,7 +454,7 @@ function ActivityRow({ item }: { item: ActivityType }) {
   );
 }
 
-// ── Reconcile Card ───────────────────────────────────────────────────────────
+// ── Reconcile Card ─────────────────────────────────────────────────────────────
 function ReconcileCard() {
   return (
     <div className="bg-amber/[0.06] dark:bg-amber/[0.08] rounded-3xl p-5 border border-amber/15">
@@ -197,24 +482,59 @@ function ReconcileCard() {
   );
 }
 
-// ── Main Screen ─────────────────────────────────────────────────────────────
+// ── Main Screen ────────────────────────────────────────────────────────────────
 export function ActivityScreen() {
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [logModalOpen, setLogModalOpen] = useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
+  const [loggedTxs, setLoggedTxs] = useState<ActivityType[]>([]);
+
   const pastByDate = pastActivities.reduce<Record<string, ActivityType[]>>((acc, item) => {
     if (!acc[item.date]) acc[item.date] = [];
     acc[item.date].push(item);
     return acc;
   }, {});
 
+  const handleLogTx = (tx: { amount: string; account: string; direction: 'in' | 'out'; note?: string }) => {
+    const newTx: ActivityType = {
+      id: `logged-${Date.now()}`,
+      description: tx.note || `${tx.direction === 'in' ? 'Received' : 'Sent'} on ${tx.account}`,
+      wallet: tx.account,
+      amount: tx.amount,
+      positive: tx.direction === 'in',
+      valueRp: 0,
+      date: 'today',
+    };
+    setLoggedTxs((prev) => [newTx, ...prev]);
+    setLogModalOpen(false);
+    setSheetOpen(false);
+  };
+
+  const handleImport = (_txs: DetectedTx[]) => {
+    // For demo, just close — in real app would add to feed
+    setImportModalOpen(false);
+    setSheetOpen(false);
+  };
+
   return (
     <div className="animate-fade-in space-y-7">
-      {/* Warm intro */}
-      <div>
-        <h1 className="text-2xl font-semibold text-ink-900 dark:text-cream tracking-tight">
-          Activity
-        </h1>
-        <p className="text-sm text-ink-500 dark:text-ink-400 mt-1">
-          Everything that moved, threaded together.
-        </p>
+      {/* Warm intro with action button */}
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold text-ink-900 dark:text-cream tracking-tight">
+            Activity
+          </h1>
+          <p className="text-sm text-ink-500 dark:text-ink-400 mt-1">
+            Everything that moved, threaded together.
+          </p>
+        </div>
+        <button
+          onClick={() => setSheetOpen(true)}
+          className="flex items-center gap-1.5 text-xs font-medium text-ink-500 dark:text-ink-400 bg-ink-50 dark:bg-ink-700 px-3 py-2 rounded-lg hover:bg-ink-100 dark:hover:bg-ink-600 transition-colors shrink-0"
+        >
+          <Plus size={14} strokeWidth={2.5} />
+          Add or import
+        </button>
       </div>
 
       {/* Today — day container */}
@@ -225,6 +545,15 @@ export function ActivityScreen() {
 
         <LinkedTradeHero />
         <AgentActionRow />
+
+        {/* Logged transactions (newly added) */}
+        {loggedTxs.length > 0 && (
+          <div className="bg-surface dark:bg-ink-800 rounded-3xl shadow-card dark:shadow-card-dark overflow-hidden divide-y divide-ink-50 dark:divide-ink-700">
+            {loggedTxs.map((item) => (
+              <ActivityRow key={item.id} item={item} showBadge />
+            ))}
+          </div>
+        )}
 
         {/* Simple items inside a soft container */}
         <div className="bg-surface dark:bg-ink-800 rounded-3xl shadow-card dark:shadow-card-dark overflow-hidden divide-y divide-ink-50 dark:divide-ink-700">
@@ -250,6 +579,50 @@ export function ActivityScreen() {
           </div>
         </section>
       ))}
+
+      {/* Bottom sheet */}
+      <BottomSheet open={sheetOpen} onClose={() => setSheetOpen(false)}>
+        <div className="px-2 pt-2 pb-1">
+          <button
+            onClick={() => { setSheetOpen(false); setLogModalOpen(true); }}
+            className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-ink-50 dark:hover:bg-ink-700/30 transition-colors rounded-xl"
+          >
+            <div className="w-10 h-10 rounded-xl bg-logged/10 flex items-center justify-center shrink-0">
+              <Pencil size={16} className="text-logged" strokeWidth={2} />
+            </div>
+            <div className="text-left">
+              <p className="text-sm font-medium text-ink-800 dark:text-ink-100">Log a transaction</p>
+              <p className="text-xs text-ink-400 dark:text-ink-500">Quick entry for cash or bank moves</p>
+            </div>
+          </button>
+          <button
+            onClick={() => { setSheetOpen(false); setImportModalOpen(true); }}
+            className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-ink-50 dark:hover:bg-ink-700/30 transition-colors rounded-xl"
+          >
+            <div className="w-10 h-10 rounded-xl bg-ink-100 dark:bg-ink-700 flex items-center justify-center shrink-0">
+              <Upload size={16} className="text-ink-500 dark:text-ink-300" strokeWidth={2} />
+            </div>
+            <div className="text-left">
+              <p className="text-sm font-medium text-ink-800 dark:text-ink-100">Import a statement</p>
+              <p className="text-xs text-ink-400 dark:text-ink-500">Paste or upload bank / e-wallet CSV</p>
+            </div>
+          </button>
+        </div>
+      </BottomSheet>
+
+      {/* Log Transaction Modal */}
+      <LogTransactionModal
+        open={logModalOpen}
+        onClose={() => setLogModalOpen(false)}
+        onLog={handleLogTx}
+      />
+
+      {/* Import Statement Modal */}
+      <ImportStatementModal
+        open={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        onImport={handleImport}
+      />
     </div>
   );
 }

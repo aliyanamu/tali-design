@@ -1,6 +1,7 @@
 import { LayoutDashboard, Activity, GitBranch, Bot, User } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { userProfile } from '../data';
+import taliLogo from '../../tali-transparent.png';
 
 type Screen = 'overview' | 'activity' | 'rules' | 'agent' | 'profile';
 
@@ -28,9 +29,7 @@ export function Layout({ children, activeScreen, onNavigate, darkMode, onToggleD
           {/* Logo */}
           <div className="px-6 pt-7 pb-6">
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-xl bg-sign flex items-center justify-center">
-                <span className="text-white font-bold text-sm leading-none">T</span>
-              </div>
+              <img src={taliLogo} alt="Tali" className="w-7 h-7 rounded-xl object-cover" />
               <span className="text-[17px] font-semibold text-ink-900 dark:text-cream tracking-tight">
                 Tali
               </span>
